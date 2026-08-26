@@ -11,15 +11,18 @@ $flashMessage = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'verify') {
     $userId = $_POST['user_id'];
 
+    // 1. Update the user's status
     $stmt = $conn->prepare("UPDATE users SET status = 'verified' WHERE user_id = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
 
+    // 2. Fetch that user's details so we can copy them into customers
     $stmt2 = $conn->prepare("SELECT full_name, phone FROM users WHERE user_id = ?");
     $stmt2->bind_param("i", $userId);
     $stmt2->execute();
     $userData = $stmt2->get_result()->fetch_assoc();
 
+    // 3. Only insert into customers if this user doesn't already have one
     $check = $conn->prepare("SELECT cust_id FROM customers WHERE user_id = ?");
     $check->bind_param("i", $userId);
     $check->execute();
@@ -78,6 +81,7 @@ $result = $conn->query(
 
     <p><a href="admin_customers.php">Manage Customers &rarr;</a></p>
     <p><a href="admin_drivers.php">Manage Drivers &rarr;</a></p>
+    <p><a href="admin_vehicles.php">Manage Vehicles &rarr;</a></p>
     <p><a href="admin_bookings.php">View All Bookings &rarr;</a></p>
     <p><a href="admin_logout.php">Log out</a></p>
 </body>
