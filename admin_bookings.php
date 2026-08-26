@@ -20,7 +20,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'assig
     $stmt->bind_param("iii", $driverId, $vehicleId, $bookingId);
     $stmt->execute();
 
-    $flashMessage = "Driver and vehicle assigned. Booking confirmed.";
+    // Fetch this booking's date/time so we can build a schedule entry
+    $bStmt = $conn->prepare("SELECT booking_date, booking_time FROM bookings WHERE booking_id = ?");
+    $bStmt->bind_param("i", $bookingId);
+    $bStmt->execute();
+    $bookingRow = $bStmt->get_result()->fetch_assoc();
+
+    $startDateTime = $bookingRow['booking_date'] . ' ' . $bookingRow['booking_time'];
+    $endDateTime = date('Y-m-d H:i:s', strtotime($startDateTime . ' +2 hours'));
+
+    $schedStmt = $conn->prepare(
+        "INSERT INTO schedules (booking_id, driver_id, vehicle_id, start_time, end_time, status)
+         VALUES (?, ?, ?, ?, ?, 'scheduled')"
+    );
+    $schedStmt->bind_param("iiiss", $bookingId, $driverId, $vehicleId, $startDateTime, $endDateTime);
+    $schedStmt->execute();
+
+    $flashMessage = "Driver and vehicle assigned. Booking confirmed and scheduled.";
 }
 
 // All bookings, joined with customer/driver/vehicle names.
