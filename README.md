@@ -202,7 +202,7 @@ nbk\_travels/
 
 \- \*\*GitHub repository:\*\* https://github.com/MurendeniMakhavhu/nbk\_travels
 
-\- \*\*Live prototype link:\*\* \_pending — currently runs on local WAMP only; hosted link to be added\_
+- **Live prototype link:** http://nbktravels.infinityfreeapp.com/nbk_travels/login.php
 
 
 
