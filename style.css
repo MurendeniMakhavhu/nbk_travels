@@ -1,0 +1,114 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f4f7fb;
+  color: #1e2a3e;
+  line-height: 1.5;
+}
+
+header.site-header {
+  background: #0b2b3b;
+  color: #fff;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+header.site-header .brand {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+header.site-header .brand span {
+  font-weight: 400;
+  font-size: 0.85rem;
+  opacity: 0.75;
+  display: block;
+}
+
+nav.site-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+nav.site-nav a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+nav.site-nav a:hover { background: rgba(255,255,255,0.15); }
+
+main {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.8rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  border: 1px solid #eef2f6;
+}
+
+h1 { font-size: 1.6rem; margin-bottom: 0.3rem; color: #0b2b3b; }
+h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #0b2b3b; }
+
+label { font-weight: 600; font-size: 0.85rem; display:block; margin-bottom: 4px; }
+
+input, select {
+  padding: 10px 12px;
+  border: 1px solid #ccd7e4;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+input:focus, select:focus { outline: 2px solid #1f6392; border-color: #1f6392; }
+
+button, .btn {
+  background: #1f6392;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+}
+button:hover, .btn:hover { background: #0e4b70; }
+.btn-danger { background: #c2410c; }
+.btn-danger:hover { background: #9a3209; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-top: 0.5rem;
+}
+th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e9edf2; }
+th { background: #f8fafd; font-weight: 600; }
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+}
+.alert-error { background:#fdecea; border-left:4px solid #c2410c; color:#7a2b0b; }
+.alert-success { background:#e0f2e9; border-left:4px solid #1f9e5c; color:#0e5c34; }
+
+footer.site-footer {
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.8rem;
+  color: #6b7a8c;
+}

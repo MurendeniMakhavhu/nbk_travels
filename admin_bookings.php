@@ -8,19 +8,15 @@ require_once "config/db.php";
 
 $flashMessage = "";
 
-// Handle driver/vehicle assignment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'assign') {
     $bookingId = $_POST['booking_id'];
     $driverId = $_POST['driver_id'];
     $vehicleId = $_POST['vehicle_id'];
 
-    $stmt = $conn->prepare(
-        "UPDATE bookings SET driver_id = ?, vehicle_id = ?, status = 'confirmed' WHERE booking_id = ?"
-    );
+    $stmt = $conn->prepare("UPDATE bookings SET driver_id = ?, vehicle_id = ?, status = 'confirmed' WHERE booking_id = ?");
     $stmt->bind_param("iii", $driverId, $vehicleId, $bookingId);
     $stmt->execute();
 
-    // Fetch this booking's date/time so we can build a schedule entry
     $bStmt = $conn->prepare("SELECT booking_date, booking_time FROM bookings WHERE booking_id = ?");
     $bStmt->bind_param("i", $bookingId);
     $bStmt->execute();
@@ -29,18 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'assig
     $startDateTime = $bookingRow['booking_date'] . ' ' . $bookingRow['booking_time'];
     $endDateTime = date('Y-m-d H:i:s', strtotime($startDateTime . ' +2 hours'));
 
-    $schedStmt = $conn->prepare(
-        "INSERT INTO schedules (booking_id, driver_id, vehicle_id, start_time, end_time, status)
-         VALUES (?, ?, ?, ?, ?, 'scheduled')"
-    );
+    $schedStmt = $conn->prepare("INSERT INTO schedules (booking_id, driver_id, vehicle_id, start_time, end_time, status) VALUES (?, ?, ?, ?, ?, 'scheduled')");
     $schedStmt->bind_param("iiiss", $bookingId, $driverId, $vehicleId, $startDateTime, $endDateTime);
     $schedStmt->execute();
 
     $flashMessage = "Driver and vehicle assigned. Booking confirmed and scheduled.";
 }
 
-// All bookings, joined with customer/driver/vehicle names.
-// LEFT JOIN on drivers/vehicles because a booking may not have one assigned yet.
 $bookings = $conn->query(
     "SELECT bookings.*, customers.full_name AS customer_name,
             drivers.full_name AS driver_name, vehicles.make AS vehicle_make, vehicles.model AS vehicle_model
@@ -51,38 +42,23 @@ $bookings = $conn->query(
      ORDER BY bookings.booking_date DESC, bookings.booking_time DESC"
 );
 
-// Lists for the assignment dropdowns
 $drivers = $conn->query("SELECT * FROM drivers WHERE availability = 'available'");
 $vehicles = $conn->query("SELECT * FROM vehicles WHERE availability = 'available'");
+
+require_once __DIR__ . '/includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Bookings</title>
-</head>
-<body>
-    <h1>All Bookings</h1>
 
-    <?php if ($flashMessage): ?>
-        <p style="color:green;"><?php echo htmlspecialchars($flashMessage); ?></p>
-    <?php endif; ?>
+<h1>All Bookings</h1>
 
-    <table border="1">
+<?php if ($flashMessage): ?>
+    <div class="alert alert-success"><?php echo htmlspecialchars($flashMessage); ?></div>
+<?php endif; ?>
+
+<div class="card">
+    <table>
         <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Pickup</th>
-            <th>Dropoff</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Pax</th>
-            <th>Fare</th>
-            <th>Driver</th>
-            <th>Vehicle</th>
-            <th>Status</th>
-            <th>Assign</th>
+            <th>ID</th><th>Customer</th><th>Pickup</th><th>Dropoff</th><th>Date</th><th>Time</th>
+            <th>Pax</th><th>Fare</th><th>Driver</th><th>Vehicle</th><th>Status</th><th>Assign</th>
         </tr>
         <?php while ($row = $bookings->fetch_assoc()): ?>
             <tr>
@@ -102,32 +78,19 @@ $vehicles = $conn->query("SELECT * FROM vehicles WHERE availability = 'available
                         <form method="POST" action="admin_bookings.php">
                             <input type="hidden" name="action" value="assign">
                             <input type="hidden" name="booking_id" value="<?php echo $row['booking_id']; ?>">
-
-                            <select name="driver_id" required>
+                            <select name="driver_id" required style="width:auto; display:inline-block; margin-bottom:6px;">
                                 <option value="">Driver...</option>
-                                <?php
-                                $drivers->data_seek(0); // reset pointer so it can be reused each loop
-                                while ($d = $drivers->fetch_assoc()):
-                                ?>
-                                    <option value="<?php echo $d['driver_id']; ?>">
-                                        <?php echo htmlspecialchars($d['full_name']); ?>
-                                    </option>
+                                <?php $drivers->data_seek(0); while ($d = $drivers->fetch_assoc()): ?>
+                                    <option value="<?php echo $d['driver_id']; ?>"><?php echo htmlspecialchars($d['full_name']); ?></option>
                                 <?php endwhile; ?>
                             </select>
-
-                            <select name="vehicle_id" required>
+                            <select name="vehicle_id" required style="width:auto; display:inline-block; margin-bottom:6px;">
                                 <option value="">Vehicle...</option>
-                                <?php
-                                $vehicles->data_seek(0);
-                                while ($v = $vehicles->fetch_assoc()):
-                                ?>
-                                    <option value="<?php echo $v['vehicle_id']; ?>">
-                                        <?php echo htmlspecialchars($v['make'] . ' ' . $v['model']); ?>
-                                    </option>
+                                <?php $vehicles->data_seek(0); while ($v = $vehicles->fetch_assoc()): ?>
+                                    <option value="<?php echo $v['vehicle_id']; ?>"><?php echo htmlspecialchars($v['make'] . ' ' . $v['model']); ?></option>
                                 <?php endwhile; ?>
                             </select>
-
-                            <button type="submit">Assign</button>
+                            <button type="submit" style="padding:6px 14px;">Assign</button>
                         </form>
                     <?php else: ?>
                         Assigned
@@ -136,8 +99,6 @@ $vehicles = $conn->query("SELECT * FROM vehicles WHERE availability = 'available
             </tr>
         <?php endwhile; ?>
     </table>
+</div>
 
-    <p><a href="admin_dashboard.php">&larr; Back to Dashboard</a></p>
-    <p><a href="admin_logout.php">Log out</a></p>
-</body>
-</html>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
